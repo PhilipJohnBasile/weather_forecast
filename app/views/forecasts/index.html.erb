@@ -1,2 +1,69 @@
-<h1>Forecasts#index</h1>
-<p>Find me in app/views/forecasts/index.html.erb</p>
+<div class="container">
+  <h1 class="title">Weather Forecast</h1>
+
+  <%= form_with url: root_path, method: :get, local: true, class: 'search-form' do |form| %>
+    <div class="form-group">
+      <%= form.text_field :address, placeholder: 'Enter an address', class: 'form-control' %>
+      <%= form.submit 'Get Forecast', class: 'btn btn-primary' %>
+    </div>
+  <% end %>
+
+  <% if @forecast.present? %>
+    <div class="forecast-container">
+      <h2 class="subtitle">Forecast for <%= @address %></h2>
+      <% current_interval = @forecast['data']['timelines'][0]['intervals'][0] %>
+      <div class="current-forecast">
+        <div class="weather-icon">
+          <i class="wi <%= @weather_icon_class %>"></i>
+        </div>
+        <div class="temperature-container">
+          <p class="temperature"><%= current_interval['values']['temperature'] %>°C</p>
+          <p class="time"><%= Time.parse(current_interval['startTime']).strftime('%Y-%m-%d %H:%M') %></p>
+        </div>
+      </div>
+
+      <% current_day = @forecast['data']['timelines'][1]['intervals'][0] %>
+      <div class="current-day-forecast">
+        <p class="high-low">
+          High: <%= current_day['values']['temperatureMax'] %>°C /
+          Low: <%= current_day['values']['temperatureMin'] %>°C
+        </p>
+        <p class="date"><%= Time.parse(current_day['startTime']).strftime('%Y-%m-%d') %></p>
+      </div>
+
+      <h3 class="subtitle">Extended Forecast</h3>
+      <table class="extended-forecast-table">
+        <thead>
+        <tr>
+          <th>Date</th>
+          <th>Time</th>
+          <th>High</th>
+          <th>Low</th>
+        </tr>
+        </thead>
+        <tbody>
+        <% @forecast['data']['timelines'][1]['intervals'].each do |interval| %>
+          <% if Time.parse(interval['startTime']).to_date > Date.today %>
+            <tr>
+              <td><%= Time.parse(interval['startTime']).strftime('%Y-%m-%d') %></td>
+              <td><%= Time.parse(interval['startTime']).strftime('%H:%M') %></td>
+              <td><%= interval['values']['temperatureMax'] %>°C</td>
+              <td><%= interval['values']['temperatureMin'] %>°C</td>
+            </tr>
+          <% end %>
+        <% end %>
+        </tbody>
+      </table>
+
+      <% if @cached %>
+        <p class="cache-info"><em>Result cached for 30 minutes.</em></p>
+      <% end %>
+    </div>
+  <% else %>
+    <% if flash[:error].present? %>
+      <p class="error-message"><%= flash[:error] %></p>
+    <% else %>
+      <p>Please enter an address to get the weather forecast.</p>
+    <% end %>
+  <% end %>
+</div>

@@ -1,0 +1,1 @@
+TOMORROW_IO_API_KEY = 'HUsBEyF8PFbWplZNqQa2fcyMasxal82r'
